@@ -1,0 +1,32 @@
+.shadow() {
+  box-shadow: 0px 0px 10px 0px #00000035;
+}
+
+.font(@color: #000000; @fontSize: 16px; @lineHeight: inherit; @textAlign: left) {
+  color: @color;
+  font-size: @fontSize;
+  line-height: @lineHeight;
+  text-align: @textAlign;
+}
+
+.absolute(@top: unset; @left: unset; @right: unset; @bottom: unset) {
+  position: absolute;
+  top: @top;
+  left: @left;
+  right: @right;
+  bottom: @bottom;
+}
+.absolute-center(@horizontal: true; @vertical: true) {
+  @left: if(@horizontal, 50%, unset);
+  @top: if(@vertical, 50%, unset);
+  @t-left: if(@horizontal, -50%, 0);
+  @t-top: if(@vertical, -50%, 0);
+  position: absolute;
+  top: @top;
+  left: @left;
+  transform: translate(@t-left, @t-top);
+}
+
+.border-box {
+  box-sizing: border-box;
+}

@@ -8,6 +8,14 @@ module.exports = {
     'eslint:recommended',
     '@vue/typescript/recommended'
   ],
+  overrides: [
+    {
+      files: ['src/views/**/*.vue'],
+      rules: {
+        'vue/multi-word-component-names': 0,
+      },
+    },
+  ],
   parserOptions: {
     ecmaVersion: 2020
   },

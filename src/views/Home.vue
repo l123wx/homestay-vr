@@ -2,13 +2,11 @@
   <div>
 		<img src="https://placekitten.com/375/200" class="banner-img" />
 		<SearchContainer class="search-box" />
-		<NavBar />
 	</div>
 </template>
 
 <script setup lang="ts">
 	import SearchContainer from '@/components/Home/SearchContainer.vue'
-	import NavBar from '@/components/NavBar.vue'
 </script>
 
 <style lang="less">

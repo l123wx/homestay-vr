@@ -20,9 +20,9 @@
   import { reactive, defineProps, withDefaults } from 'vue';
 
   interface Props {
-    showLocationBtn: boolean
-    kerleyColor: string //间隔线颜色
-    showSearchWordInputEmptyBtn: boolean
+    showLocationBtn?: boolean
+    kerleyColor?: string //间隔线颜色
+    showSearchWordInputEmptyBtn?: boolean
   }
   const props = withDefaults(defineProps<Props>(), {
     showLocationBtn: true,

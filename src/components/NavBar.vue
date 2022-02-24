@@ -33,6 +33,7 @@
       position: relative;
       span {
         .absolute-center();
+        text-align: center;
       }
       &.center>span {
         width: 100%;

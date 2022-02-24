@@ -1,48 +1,44 @@
 <template>
-  <ul class="sort-nav-container">
-    <li v-for="item in sortList" :key="item.title">
-      {{ item.title }}
-      <Icon :name="'arrow-' + (item.active ? 'up' : 'down')" />
-    </li>
-  </ul>
+  <DropdownMenu active-color="#5856d6">
+    <DropdownItem v-for="item in sortList" :key="item.title" :title="item.title" v-model="item.value" :options="item.options" />
+  </DropdownMenu>
 </template>
 
 <script setup lang="ts">
-  import { Icon } from "vant"
-  interface sortInfo {
-    title: string;
-    active: boolean;
+  import { DropdownMenu, DropdownItem } from 'vant';
+  interface SortInfo {
+    title: string
+    value: number
+    options?: Array<SortOption>
   }
-  const sortList: Array<sortInfo> = [
+  interface SortOption {
+    text: string,
+    value: number
+  }
+  const sortList: Array<SortInfo> = [
     {
       title: '人数',
-      active: false
+      value: 0,
+      options: [
+        {
+          text: '1',
+          value: 1
+        }
+      ]
     }, {
       title: '未知区域',
-      active: false
+      value: 1
     }, {
       title: '排序',
-      active: false
+      value: 2
     }, {
       title: '筛选',
-      active: false
+      value: 3
     }
   ];
 </script>
 <style scoped lang="less">
-  .sort-nav-container {
-    display: flex;
-    padding: 10px 0;
-    li {
-      position: relative;
-      flex: auto;
-      font-size: 14px;
-      &::before {
-        .kerley(120%);
-      }
-      i {
-        font-size: 12px;
-      }
-    }
+  .van-dropdown-menu__item {
+    flex: auto;
   }
 </style>

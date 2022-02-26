@@ -4,7 +4,7 @@
       <SearchBar />
     </template>
     <template v-slot:right>
-      <Icon name="map-marked"></Icon>
+      <Icon name="map-marked" class="map-icon"></Icon>
       <span>地图</span>
     </template>
   </NavBar>
@@ -16,9 +16,12 @@
   import SearchBar from "./SearchBar.vue"
 </script>
 <style scoped lang="less">
-  span {
+  .map-icon {
+    font-size: 18px;
+  }
+  .map-icon + span {
     width: 24px;
-    font-size: 12px;
+    font-size: 10px;
     display: block;
     margin-top: -4px;
   }

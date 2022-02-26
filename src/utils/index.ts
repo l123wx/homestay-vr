@@ -1,5 +1,4 @@
 export const isSafari = ():boolean => {
-  console.log(navigator.userAgent)
   return /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
 }
 

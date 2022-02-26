@@ -29,11 +29,14 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('../views/My.vue'),
       }
     ]
-  },
-  {
+  }, {
     path: '/homestayList',
     name: 'homestayList',
     component: () => import('../views/HomestayList.vue')
+  }, {
+    path: '/homestayDetail',
+    name: 'homestayDetail',
+    component: () => import('../views/HomestayDetail.vue')
   }
 ]
 

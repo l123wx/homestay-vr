@@ -1,11 +1,7 @@
 <template>
   <div class="room-container">
     <div class="banner">
-      <Swipe indicator-color="white">
-        <SwipeItem v-for="item in 4" :key="item">
-          <img :src="getPlaceholderImg(900, 500)" />
-        </SwipeItem>
-      </Swipe>
+      <ImgBanner />
       <div class="collect-btn">
         <Icon name="like-o" />
       </div>
@@ -18,9 +14,9 @@
 </template>
 
 <script setup lang="ts">
-  import { Swipe, SwipeItem, Icon } from 'vant';
-  import { getPlaceholderImg } from '@/utils/index';
-  import TabList from '@/components/HomestayList/TabList.vue'
+  import { Icon } from 'vant';
+  import TabList from '@/components/TabList.vue'
+  import ImgBanner from '@/components/ImgBanner.vue'
   const tabList = [
     {
       title: '景点1',
@@ -43,17 +39,6 @@
       position: relative;
       overflow: hidden;
       // background-color: @color-light-gray-3;
-      .van-swipe {
-        height: 100%;
-        .van-swipe-item {
-          border-radius: 10px;
-          overflow: hidden;
-          img {
-            height: 100%;
-            .absolute-center();
-          }
-        }
-      }
       .collect-btn {
         .absolute(@right: 20px; @top: 20px);
         i {

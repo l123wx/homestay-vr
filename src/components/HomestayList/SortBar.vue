@@ -1,6 +1,11 @@
 <template>
   <DropdownMenu active-color="#5856d6">
-    <DropdownItem v-for="item in sortList" :key="item.title" :title="item.title" v-model="item.value" :options="item.options" />
+    <DropdownItem
+      v-for="item in sortList"
+      :key="item.title"
+      :title="item.title"
+      v-model="item.value"
+      :options="item.options" />
   </DropdownMenu>
 </template>
 
@@ -37,8 +42,13 @@
     }
   ];
 </script>
-<style scoped lang="less">
-  .van-dropdown-menu__item {
-    flex: auto;
+<style lang="less">
+  .van-dropdown-menu {
+    .van-dropdown-menu__bar {
+      box-shadow: unset;
+      .van-dropdown-menu__item {
+        flex: auto;
+      }
+    }
   }
 </style>

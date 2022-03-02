@@ -9,7 +9,7 @@
     <div class="cell">
       <KeywordList />
     </div>
-    <Button size="large" color="#5856d6">搜索房源</Button>
+    <Button size="large" color="#5856d6" @click="SearchHomestay">搜索房源</Button>
   </div>
 </template>
 
@@ -18,6 +18,10 @@
   import AddressInput from "./AddressInput.vue"
   import KeywordList from "./KeywordList.vue" 
   import { Button } from "vant"
+  import router from "@/router/index"
+  function SearchHomestay(): void {
+    router.push('/homestayList')
+  }
 </script>
 <style scoped lang="less">
   .container {

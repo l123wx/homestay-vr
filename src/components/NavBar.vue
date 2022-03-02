@@ -3,7 +3,7 @@
     <div class="left">
       <span>
         <slot name="left">
-          <Icon name="arrow-left" size="20px"></Icon>
+          <Icon name="arrow-left" size="20px" @click="router.back"></Icon>
         </slot>
       </span>
     </div>
@@ -23,6 +23,7 @@
 <script setup lang="ts">
   import { Icon } from "vant"
   import { withDefaults, defineProps } from "vue"
+  import router from '@/router/index'      
   interface Props {
     bgColor?: string
     centerTextAlign?: string

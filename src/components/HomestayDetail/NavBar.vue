@@ -1,7 +1,7 @@
 <template>
   <NavBar class="nav-bar" bgColor="transparent" centerTextAlign="right">
     <template v-slot:left>
-      <Icon name="cross" />
+      <Icon name="cross" @click="router.back"/>
     </template>
     <template v-slot:default>
       <Icon name="share-o" />
@@ -15,6 +15,7 @@
 <script setup lang="ts">
   import NavBar from '@/components/NavBar.vue'
   import { Icon } from 'vant'
+  import router from '@/router/index'
 </script>
 <style scoped lang="less">
   .nav-bar {

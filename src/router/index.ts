@@ -1,14 +1,14 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
+    path: '/tabbarPage',
     name: 'tabbarPage',
     component: () => import('../views/TabbarPage.vue'),
     children: [
       {
-        path: '/home',
+        path: '/',
         name: 'home',
         component: () => import('../views/Home.vue'),
       }, {
@@ -37,11 +37,20 @@ const routes: Array<RouteRecordRaw> = [
     path: '/homestayDetail',
     name: 'homestayDetail',
     component: () => import('../views/HomestayDetail.vue')
+  }, {
+    path: '/panoramaEdit',
+    name: 'panoramaEdit',
+    component: () => import('../views/PanoramaEdit.vue')
+  }, {
+    path: '/panoramaView',
+    name: 'panoramaView',
+    component: () => import('../views/PanoramaView.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(process.env.BASE_URL),
+  // history: createWebHistory(process.env.BASE_URL),
+  history: createWebHashHistory(process.env.BASE_URL),
   routes
 })
 

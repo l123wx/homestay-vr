@@ -1,5 +1,5 @@
 <template>
-  <div class="room-container">
+  <div class="room-container" @click="toDetailPage">
     <div class="banner">
       <ImgBanner />
       <div class="collect-btn">
@@ -17,6 +17,7 @@
   import { Icon } from 'vant';
   import TabList from '@/components/TabList.vue'
   import ImgBanner from '@/components/ImgBanner.vue'
+  import router from '@/router/index';
   const tabList = [
     {
       title: '景点1',
@@ -26,13 +27,16 @@
       value: 2
     }, 
   ]
+  function toDetailPage(): void {
+    router.push('/homestayDetail');
+  }
 </script>
 <style scoped lang="less">
   .room-container {
-    // &:active {
-    //   transform: scale(.95);
-    //   transition: transform .1s;
-    // }
+    &:active {
+      transform: scale(.95);
+      transition: transform .1s;
+    }
     .banner {
       border-radius: 10px;
       height: 220px;

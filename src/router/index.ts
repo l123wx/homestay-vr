@@ -38,13 +38,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'homestayDetail',
     component: () => import('../views/HomestayDetail.vue')
   }, {
+    path: '/panoramaAdmin',
+    name: 'panoramaAdmin',
+    component: () => import('../views/PanoramaAdmin.vue'),
+    meta: {
+      keepAlive: true
+    }
+  }, {
     path: '/panoramaEdit',
     name: 'panoramaEdit',
     component: () => import('../views/PanoramaEdit.vue')
-  }, {
-    path: '/panoramaView',
-    name: 'panoramaView',
-    component: () => import('../views/PanoramaView.vue')
   }
 ]
 

@@ -10,6 +10,7 @@
   interface Props {
     width?: number
     height?: number
+    path: string
   }
   const props = withDefaults(defineProps<Props>(), {
     width: 50,

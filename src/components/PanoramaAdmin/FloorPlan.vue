@@ -2,32 +2,49 @@
   <div>
     <div class="floor-plan-container">
       <div>
-        <Uploader class="uploader" v-model="fileList" :max-count="1" />
+        <Uploader
+          class="uploader"
+          v-model="fileList"
+          :max-count="1"
+          :after-read="onFloorPlanUpload"
+          @delete="emit('update:floorPlanPath', '')" />
         <div
           class="compass"
           src="@/assets/images/compass.png"
-          :style="'transform: rotate(' + 180 / 50 * (inputValue - 50) + 'deg)'"></div>
+          :style="'transform: rotate(' + 180 / 50 * (compassAngleInputValue - 50) + 'deg)'"></div>
       </div>
       <div>方向：{{ compassText }}</div>
       <div>调整指针，指向户型图正北方向</div>
-      <input type="range" v-model="inputValue" />
+      <input type="range" v-model="compassAngleInputValue" @change="$emit('update:compassAngle', compass)" />
     </div>
-    <Field label="房屋面积" placeholder="请输入房屋面积" v-model="area" />
+    <Field v-model="area" :formatter="(val: string) => (Number(val) || '').toString()" type="number" label="房屋面积" placeholder="请输入房屋面积" @change="$emit('update:area', Number(($event.target as HTMLInputElement).value) || 0)" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { Uploader, Field, Notify } from 'vant';
-import { ref, watch, defineExpose, readonly, reactive } from 'vue';
+import { Uploader, Field } from 'vant';
+import { ref, watch, defineProps, defineEmits } from 'vue';
 import type { UploaderFileListItem } from 'vant'
+const props = defineProps<{
+  area: number
+  floorPlanPath: string
+  compassAngle: number
+}>()
+const emit = defineEmits([
+  'update:area',
+  'update:floorPlanPath',
+  'update:compassAngle'
+])
 
-const inputValue = ref(50)
-const fileList = ref<UploaderFileListItem[]>()
+function onFloorPlanUpload(item: any) {
+  emit('update:floorPlanPath', window.URL.createObjectURL((item as UploaderFileListItem).file as File))
+}
+
+// 指针角度
+const compassAngleInputValue = ref(50)
 const compass = ref(0)
 const compassText = ref('0° 正北')
-const area = ref();
-
-watch(inputValue, function(e) {
+watch(compassAngleInputValue, function(e) {
   compass.value = Math.floor(360 / 100 * ((e * 1 + 50) % 100));
   let text;
   if (compass.value == 0) text = '正北'
@@ -41,25 +58,23 @@ watch(inputValue, function(e) {
   compassText.value = compass.value + '° ' + text
 })
 
-function getData(){
-  // if (!(area.value && fileList.value[0].content && compass.value)) return 1
-  if (!(fileList.value && fileList.value[0]?.file)) {
-    Notify('请上传户型图！')
-    return false;
-  } else if (!area.value) {
-    Notify('请输入房屋面积')
-    return false;
+// 户型图
+const fileList = ref<UploaderFileListItem[]>([])
+watch(() => props.floorPlanPath, (newValue) => {
+  console.log(newValue)
+  if (newValue == '') {
+    fileList.value = []
+  } else {
+    fileList.value = [{
+      url: newValue,
+      isImage: true
+    }]
   }
-  return {
-    area: area.value,
-    floorPlanPath: fileList.value[0].file,
-    compass: compass.value
-  }
-}
+})
 
-defineExpose({
-  getData
-});
+// 房屋面积
+const area = ref<number | null>();
+
 </script>
 <style scoped lang="less">
   .floor-plan-container {
@@ -73,7 +88,7 @@ defineExpose({
       .uploader {
         width: 100%;
         height: 100%;
-        &:deep .van-uploader__preview {
+        &:deep(.van-uploader__preview) {
           margin: 0;
           .van-uploader__preview-image {
             width: auto;

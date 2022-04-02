@@ -1,54 +1,90 @@
 <template>
-  <div class="address-container">
+  <div class="address-container" @click="showCascaderPopup = true">
     <div class="city">
-      {{ data.city }}
+      {{ addressCascaderText || '未知地点' }}
       <Icon name="arrow-down"></Icon>
     </div>
-    <div class="search-word">
-      {{ data.address || '景点/地址/房源名' }}
-      <Icon name="clear" v-if="showSearchWordInputEmptyBtn"></Icon>
-    </div>
-    <div class="location-btn" v-if="props.showLocationBtn">
-      <Icon name="aim"></Icon>
-      <span>当前位置</span>
+    <div class="search-word" :style="keyword ? 'color:#000' : ''">
+      {{ keyword || '景点/地址/房源名' }}
     </div>
   </div>
+  <Popup v-model:show="showCascaderPopup" round position="bottom" closeable @closed="onPopupClose">
+    <Field label="关键词" v-model="keyword" placeholder="景点/地址/房源名" style="margin-top:5px;padding-right:54px"></Field>
+    <Cascader
+      v-model="addressCascaderValue"
+      title="请选择所在地区"
+      :closeable="false"
+      :options="addressCascaderOptions"
+      @finish="onCascaderFinish"
+    />
+  </Popup>
 </template>
 
 <script setup lang="ts">
-  import { Icon } from 'vant'
-  import { reactive, defineProps, withDefaults } from 'vue';
+  import { Icon, Popup, Cascader, Field } from 'vant'
+  import { defineProps, withDefaults, ref, watch, defineExpose, defineEmits } from 'vue';
+  import { cityData } from '@/assets/javascript/city'
 
   interface Props {
-    showLocationBtn?: boolean
     kerleyColor?: string //间隔线颜色
-    showSearchWordInputEmptyBtn?: boolean
+    keyword?: string
+    addressValue?: string
+    addressText?: string
   }
   const props = withDefaults(defineProps<Props>(), {
-    showLocationBtn: true,
     kerleyColor: '#c7c7cc',
-    showSearchWordInputEmptyBtn: false
+    keyword: '',
+    addressValue: '',
+    addressText: ''
   })
 
-  let data = reactive<{
-    city: string,
-    address: string,
-    beginTime: Date | null,
-    endTime: Date | null,
-    peopleNum: number
-  }>({
-    city: '广州市',
-    address: '',
-    beginTime: null,
-    endTime: null,
-    peopleNum: 0
+  const keyword = ref('')
+  watch(() => props.keyword, (value) => {
+    console.log(value)
+    keyword.value = value
+  })
+
+  watch(() => props.addressValue, (value) => {
+    addressCascaderValue.value = value
+  })
+  watch(() => props.addressText, (value) => {
+    addressCascaderText.value = value
+  })
+  const showCascaderPopup = ref(false)
+  const addressCascaderOptions = cityData
+  const addressCascaderValue = ref('')
+  const addressCascaderText = ref('')
+  function onCascaderFinish({ selectedOptions }: any) {
+    addressCascaderText.value = selectedOptions[2].text
+  }
+
+  const emits = defineEmits(['AddressEditFinished'])
+
+  function onPopupClose() {
+    emits('AddressEditFinished', {
+      keyword: keyword.value,
+      addressValue: addressCascaderValue.value,
+      addressText: addressCascaderText.value
+    })
+  }
+
+  defineExpose({
+    getData() {
+      return {
+        keyword: keyword.value,
+        addressValue: addressCascaderValue.value,
+        addressText: addressCascaderText.value
+      }
+    }
   })
 </script>
 <style scoped lang="less">
   .address-container {
+    width: 100%;
     display: flex;
     align-items: center;
     @spacing: 10px;
+    flex: 1;
     .city {
       font-weight: bold;
       padding-right: @spacing;
@@ -60,8 +96,7 @@
     .search-word {
       color: @color-medium-gray;
       .font(@color: @color-medium-gray; @fontSize: 14px);
-      @paddingRight: @spacing + if(v-bind(showSearchWordInputEmptyBtn), 16px, 0);
-      padding: 0 @paddingRight 0 @spacing;
+      padding: 0 @spacing;
       position: relative;
       flex: 1;
       &::before {

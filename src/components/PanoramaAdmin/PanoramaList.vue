@@ -2,9 +2,9 @@
   <div class="panorama-list-containter">
     <div class="title">全景图列表</div>
     <ul>
-      <li v-for="item in panoramaList" :key="item.path">
+      <li v-for="(item, index) in panoramaList" :key="item.path">
         <div>{{ item.name }}</div>
-        <Button type="success" size="mini">编辑</Button>
+        <Button type="success" size="mini" @click="onPanoramaEditBtnClick(index)">编辑</Button>
       </li>
     </ul>
     <Button
@@ -14,27 +14,45 @@
       size="large"
       color="#8e8e93"
       icon="plus"
-      @click="toPanoramaEditPage">添加全景图</Button>
+      @click="onAddPanoramaBtnClick">添加全景图</Button>
   </div>
 </template>
 
 <script setup lang="ts">
-import router from '@/router';
+import { useRouter } from 'vue-router';
+import Vuex from '@/store/index';
 import { Button } from 'vant';
 import { PanoramaItem } from '@/assets/javascript/panorama/Panorama';
-import { ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
-const outside_low_url = require('@/assets/images/outside_low.jpg');
-const panoramaList = ref<PanoramaItem[]>([
-  {
-    name: '厨房',
-    path: outside_low_url,
-    fov: 70,
-    deviationAngle: 0
-  }
-])
-function toPanoramaEditPage() {
-  router.push('/panoramaEdit')
+const router = useRouter();
+console.log(Vuex)
+
+function onAddPanoramaBtnClick() {
+  toAddPanoramaPage();
+}
+
+function toAddPanoramaPage() {
+  router.push({
+    name: 'panoramaEdit',
+    params: {
+      state: 'add'
+    }
+  })
+}
+
+const panoramaList = computed(() => {
+  return (Vuex.state as any).panorama.panoramaList;
+})
+
+function onPanoramaEditBtnClick(index: number) {
+  router.push({
+    name: 'panoramaEdit',
+    params: {
+      index,
+      state: 'update'
+    }
+  })
 }
 </script>
 <style scoped lang="less">

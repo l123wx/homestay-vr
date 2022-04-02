@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import { createApp, reactive } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
@@ -18,3 +18,7 @@ handleResize();
 if (isSafari()) {
   window.addEventListener("resize", handleResize);
 }
+
+export const gobalData = reactive({
+  userType: 0, // 0 房客 1 房东
+})

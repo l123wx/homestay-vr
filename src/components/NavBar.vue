@@ -9,7 +9,7 @@
     </div>
     <div class="center">
       <span>
-        <slot>navbar标题</slot>
+        <slot></slot>
       </span>
     </div>
     <div class="right">
@@ -43,8 +43,10 @@
     display: flex;
     div {
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       span {
-        .absolute-center();
         text-align: center;
       }
       &.center>span {

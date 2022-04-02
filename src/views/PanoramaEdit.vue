@@ -1,134 +1,163 @@
 <template>
-  <NavBar>{{ pageState == 'add' ? '添加' : '编辑'}}全景图</NavBar>
-  <div v-show="!PanoramaEditing">
+  <NavBar>
+    <template v-slot:left>
+      <Icon name="arrow-left" size="22px" @click="onNavBackBtnClick" />
+    </template>
+    {{ pageState == 'add' ? '添加' : '编辑'}}全景图
+    <template v-slot:right v-if="panoramaEditing">
+      <Icon name="success" size="22px" @click="onPanoramaEditSubmit" />
+    </template>
+  </NavBar>
+  <div v-show="panoramaEditState == PanoramaEditState['index']">
     <CellGroup>
-      <Field label="文本" placeholder="请输入用户名" />
+      <Field label="房间名称" placeholder="请输入房间名称" v-model="panoramaInfo.name" />
       <Cell title-class="van-field__label" title="全景图" center>
         <div class="align-left">
           <Uploader
             class="uploader"
             :after-read="afterRead"
             v-model="imgList"
+            @delete="onDeletePhoto"
             :max-count="1" />
         </div>
       </Cell>
       <Cell title-class="van-field__label" title="全景图配置" center>
-        <Button type="success" size="mini" style="padding: 0 20px">编辑</Button>
+        <Button type="success" size="mini" style="padding: 0 20px" @click="onPanoramaConfigEditBtnClick">编辑</Button>
       </Cell>
       <Cell title-class="van-field__label" title="全景图关联" center>
-        <Button type="success" size="mini" style="padding: 0 20px">编辑</Button>
+        <Button type="success" size="mini" style="padding: 0 20px" @click="panoramaEditState = PanoramaEditState['connecting']">编辑</Button>
       </Cell>
     </CellGroup>
-    <Button size="large" type="success">{{ pageState == 'add' ? '添加' : '保存'}}</Button>
+    <Button size="large" type="success" @click="onSubmitBtnClick">{{ pageState == 'add' ? '添加' : '保存'}}</Button>
   </div>
-  <div class="panorama-view" ref="panoramaView">
-    <div class="map">
-      <div class="location_point" :style="'transform:rotate(' + angle + 'deg)'"></div>
-      <img src="@/assets/images/floorPlan-text.png" />
-    </div>
-  </div>
+  <PanoramaView v-if="panoramaEditState == PanoramaEditState['editing']" :floor-plan-img="floorPlanImg" ref="panoramaView" :panorama-info="panoramaInfo" />
+  <PanoramaConnect v-if="panoramaEditState == PanoramaEditState['connecting']" ref="panoramaConnecting" :panorama-info="panoramaInfo" />
 </template>
 
 <script setup lang="ts">
 import NavBar from '@/components/NavBar.vue'
-import { Cell, CellGroup, Field, Uploader, Button } from 'vant';
-import { onBeforeUnmount, onMounted, Ref, ref } from 'vue';
-import { Panorama, PanoramaItem } from '@/assets/javascript/panorama/Panorama'
+import PanoramaView from '@/components/PanoramaAdmin/PanoramaEdit/PanoramaView.vue'
+import PanoramaConnect from '@/components/PanoramaAdmin/PanoramaEdit/PanoramaConnect.vue'
+import { Cell, CellGroup, Field, Uploader, Button, Icon } from 'vant';
+import type { UploaderFileListItem } from 'vant';
+import { PanoramaItem } from "@/assets/javascript/panorama/Panorama";
+import { computed, onMounted, readonly, ref, unref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import Vuex from '@/store/index';
+const router = useRouter(),
+  route = useRoute();
 
-let pageState: 'add' | 'update' = 'add';
-let PanoramaEditing = true;
+let pageState = ref<'add' | 'update'>('add'), // 页面编辑类型，新建or编辑
+  panroamaIndex: string;
 
-const imgList = ref([{
-  url: 'https://img.yzcdn.cn/vant/leaf.jpg'
-}]);
-
-function afterRead() {
-  console.log(arguments)
+enum PanoramaEditState {
+  'index',
+  'editing',
+  'connecting'
 }
 
-const panoramaView = ref(),
-  angle = ref(0);
-let panorama: Panorama;
-const panoramaList: Array<PanoramaItem> = [
-  {
+const floorPlanImg = ref<string>(''), // 户型图
+  panoramaEditing = ref(false), // 当前是否在全景编辑页面
+  panoramaConnecting = ref(false),
+  panoramaEditState = ref<PanoramaEditState>(0),
+
+  panoramaView = ref(), // 全景组件dom
+  imgList = ref<UploaderFileListItem[]>([]),
+  panoramaInfo = ref<PanoramaItem>({
     name: '',
-    path: require('@/assets/images/outside.jpg'),
-    fov: 75,
-    deviationAngle: 0
-  }
-]
+    path: '',
+    fov: 0,
+    cameraPosition: {
+      x: 0, y: 0, z: 0
+    },
+    location: {
+      x: 0, y: 0
+    }
+  });
+
+const panoramaItem = computed(() => {
+  return (Vuex.state as any).panorama.panoramaList[panroamaIndex]
+})
+
 
 onMounted(function() {
-  panorama = new Panorama(panoramaView.value)
-  panorama.setPanorama(panoramaList[0]);
-  // console.log(panoramaView.value.angle)
-  // angle = panoramaView.value?.angle;
-  animate();
+  if (route.params.state) {
+    pageState.value = route.params.state as ('add' | 'update');
+  }
+  if (pageState.value == 'add') return;
+  if (route.params.index) {
+    panroamaIndex = route.params.index as string;
+    panoramaInfo.value = readonly(panoramaItem.value);
+    console.log(panoramaInfo.value)
+    if (panoramaInfo.value.path == undefined) return;
+    imgList.value.push({
+      url: panoramaInfo.value.path
+    })
+  }
+  floorPlanImg.value = (Vuex.state as any).panorama.floorPlanPath;
 })
 
-let animate: any = function() {
-  if (!animate) return
-  requestAnimationFrame(animate);
-  angle.value = panorama.getCameraRotationYAngle();
+function afterRead(e: any) {
+  panoramaInfo.value.path = window.URL.createObjectURL(e.file)
 }
 
-onBeforeUnmount(function() {
-  animate = null;
-})
+function onNavBackBtnClick() {
+  if (panoramaEditState.value == PanoramaEditState['index']) {
+    backToPanoramaList();
+  } else {
+    panoramaEditState.value = PanoramaEditState['index'];
+  }
+}
+
+function onDeletePhoto() {
+  panoramaInfo.value.path = '';
+}
+
+function onPanoramaConfigEditBtnClick() {
+  panoramaEditState.value = PanoramaEditState['editing'];
+}
+
+function onPanoramaEditSubmit() {
+  const res = panoramaView.value;
+  panoramaInfo.value = {
+    ...panoramaInfo.value,
+    fov: res.getFov(),
+    cameraPosition: res.getRotations(),
+    location: res.getLocation()
+  }
+  panoramaEditing.value = false;
+}
+
+function backToPanoramaList() {
+  router.back()
+}
+
+function onSubmitBtnClick() {
+  if (pageState.value == 'add') {
+    addPanorama();
+  } else {
+    updatePanorama();
+  }
+  router.back();
+}
+
+function addPanorama() {
+  Vuex.commit('addPanorama', unref(panoramaInfo));
+}
+
+function updatePanorama() {
+  Vuex.commit('updatePanorama', {
+    index: panroamaIndex,
+    panoramaItem: unref(panoramaInfo)
+  });
+}
+
 </script>
 <style scoped lang="less">
   .align-left {
     text-align: left
   }
-  .uploader:deep .van-uploader__preview-image {
+  .uploader:deep(.van-uploader__preview-image) {
     width: auto;
-  }
-  .panorama-view {
-    height: calc(100% - 50px);
-    position: relative;
-    .map {
-      width: 15em;
-      height: 15em;
-      position: absolute;
-      right: 1em;
-      top: 1em;
-      opacity: 0.5;
-      font-size: 10px;
-      text-align: center;
-      background-color: rgba(0, 0, 0, 0.5);
-      &.active {
-        .absolute-center(true, false);
-        font-size: 5.7vw;
-        opacity: 1;
-        top: 20px;
-        outline: 100vh solid rgba(0, 0, 0, 0.5);
-      }
-      img {
-        max-height: 100%;
-        max-width: 100%;
-      }
-      .location_point {
-        .absolute-center();
-        &::before {
-          content: '';
-          position: absolute;
-          border: 1em solid transparent;
-          border-top: 1.8em solid #03a9f4;
-          border-bottom: none;
-          .absolute-center(true, false);
-          bottom: -.4em;
-          opacity: 0.5;
-        }
-        &::after {
-          content: '';
-          position: absolute;
-          height: 1em;
-          width: 1em;
-          border-radius: 50%;
-          background-color: blue;
-          .absolute-center();
-        }
-      }
-    }
   }
 </style>

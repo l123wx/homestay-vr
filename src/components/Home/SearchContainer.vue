@@ -1,26 +1,42 @@
 <template>
   <div class="container">
     <div class="cell">
-      <AddressInput :showSearchWordInputEmptyBtn="true"/>
+      <AddressInput ref="addressInput" :keyword="keyword" :addressValue="addressValue" />
     </div>
     <div class="cell">
-      <InfoInput />
-    </div>
-    <div class="cell">
-      <KeywordList />
+      <KeywordList @keywordItemClick="onkeywordListClick" />
     </div>
     <Button size="large" color="#5856d6" @click="SearchHomestay">搜索房源</Button>
   </div>
 </template>
 
 <script setup lang="ts">
-  import InfoInput from "./InfoInput.vue"
   import AddressInput from "./AddressInput.vue"
   import KeywordList from "./KeywordList.vue" 
   import { Button } from "vant"
   import router from "@/router/index"
+  import { ref } from "vue"
+
+  const keyword = ref('')
+  const addressValue = ref('')
+
+  const addressInput = ref()
+
+  function onkeywordListClick(_keyword: string) {
+    console.log(_keyword)
+    keyword.value = _keyword
+  }
+
   function SearchHomestay(): void {
-    router.push('/homestayList')
+    const { keyword, addressValue, addressText } = addressInput.value.getData()
+    router.push({
+      name: 'homestayList',
+      params: {
+        keyword,
+        addressValue,
+        addressText
+      }
+    })
   }
 </script>
 <style scoped lang="less">

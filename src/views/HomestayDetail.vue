@@ -1,121 +1,176 @@
 <template>
-  <NavBar />
-  <ImgBanner class="banner" />
-  <div class="info-cell title">
-    <div class="description">整套公寓型住宅 · 1室1卫1床 · 可住2人</div>
-    <div class="title">民宿名称名宿名称名宿名称民宿名称民宿名...</div>
-    <TabList class="tab-list" :plain="true" :tabList="tabList"/>
-    <div class="time">
-      <div>
-        <span class="begin">2月10日</span>
-        <span class="end">2月10日</span>
-      </div>
-      <span class="amount">
-        共一晚
-        <Icon name="arrow" />
-      </span>
+  <NavBar :is-collect="homestayData?.isCollect == 1" @collect-btn-click="onCollectBtnClick" />
+  <div class="banner" @click="toPanoramaViewPage()">
+    <img :src="homestayData?.bannerPath" />
+    <div class="panoramaIcon">
+      <img src="@/assets/images/720°.png" />
     </div>
+  </div>
+  <div class="info-cell title">
+    <div class="description">{{ homestayData?.buildingType || '' }}·{{ homestayData?.houseType || '' }}·{{ homestayData?.toilet?.type || ''}}</div>
+    <div class="title">{{ homestayData?.homestayName }}</div>
+    <div class="price">￥{{ homestayData?.price }}</div>
   </div>
   <div class="info-cell detail">
     <div class="cell-title">房源信息</div>
+    <ul>
+      <li>
+        <img src="@/assets/images/icon-home.png" />
+        <div>{{ homestayData?.roomerInfo?.roomNumber || 0 }}间卧室</div>
+      </li>
+      <li>
+        <img src="@/assets/images/icon-bed.png" />
+        <div>{{ homestayData?.roomerInfo?.bedNumber || 0 }}张床</div>
+      </li>
+      <li>
+        <img src="@/assets/images/icon-toilet.png" />
+        <div>{{ homestayData?.toilet?.number || 0}}个卫生间</div>
+      </li>
+      <li>
+        <img src="@/assets/images/icon-people.png" />
+        <div>宜住{{ homestayData?.roomerInfo?.peopleNumber || 0 }}人</div>
+      </li>
+    </ul>
   </div>
   <div class="info-cell address">
     <div class="cell-title">
-      位置周边
-      <div>
-        地图 / 周边
-        <Icon name="arrow" />
-      </div>
+      房源位置
     </div>
     <div class="address-detail">
-      <div class="content">广东·广州·天河区·大观路·距你所在位置1.8km</div>
-      <div class="copy-btn">复制地址</div>
+      <div class="content">{{ homestayData?.address?.text.replaceAll('/', '·') + '·' + homestayData?.address?.detail}}</div>
+      <div class="copy-btn" @click="copyAddress">复制地址</div>
     </div>
-    <div class="map-container">
-      
-    </div>
-  </div>
-  <div class="info-cell evaluate">
-    <div class="cell-title">房客评价</div>
   </div>
   <div class="info-cell services">
     <div class="cell-title">设施/服务</div>
     <div class="container">
       <img src="@/assets/images/homestay-services.jpg" />
     </div>
-    <div class="more-btn">查看更多</div>
   </div>
   <div class="info-cell landlord-info">
     <div class="info-content">
       <div>
-        <Avatar :width="50" :height="50"/>
+        <Avatar :width="50" :height="50" :path="homestayData?.landlordInfo?.avatarPath || ''"/>
         <div>
-          <div class="name">房东昵称</div>
+          <div class="name">{{ homestayData?.landlordInfo?.name }}</div>
         </div>
       </div>
-      <div class="contact-btn">
+      <div class="contact-btn" @click="contactLandlord">
         <Icon name="chat" size="18px"/>
         联系房东
       </div>
     </div>
     <div class="evaluate">
       <div class="desc">超赞房东经验丰富、评分很高，致力于为房客提供优质的住宿</div>
-      <div class="detail">
-        <div>
-          <div>平均分</div>
-          <div data-unit="分">4.8</div>
-          <div>187条评价</div>
-        </div>
-        <div>
-          <div>24小时回复率</div>
-          <div data-unit="%">87</div>
-          <div>评均1分钟内回复</div>
-        </div>
-        <div>
-          <div>订单确认率</div>
-          <div data-unit="%">100</div>
-          <div>最近已接94单</div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="bottom-nav">
-    <div class="contact">
-      <Avatar :width="30" :height="30" />
-      <div>联系房东</div>
-    </div>
-    <div class="time">
-      <div>02/19入住</div>
-      <div>02/19离开</div>
-    </div>
-    <div class="reserve-btn">
-      <div class="price">111.13</div>
-      预定
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
   import NavBar from '@/components/HomestayDetail/NavBar.vue'
-  import TabList from '@/components/TabList.vue'
-  import ImgBanner from '@/components/ImgBanner.vue'
+  import { getPlaceholderImg } from '@/utils/index';
   import Avatar from '@/components/Avatar.vue'
-  import { Icon } from 'vant'
-  const tabList = [
-    {
-      title: '景点1',
-      value: 0
-    }, {
-      title: '景点2',
-      value: 2
-    }, 
-  ]
+  import { Icon, Notify } from 'vant'
+  import { useRouter } from 'vue-router'
+  import { inject, Ref, ref } from 'vue';
+  import type { HomestayData } from '@/types/homestay'
+  const router = useRouter()
+  const { showLoading, hideLoading }: any = inject('loadingOperation')
+
+  // 房源数据
+  const homestayData = ref<HomestayData>()
+  function loadHomestayData() {
+    getHomestayDataRequest().then((res:any) => {
+      homestayData.value = res.data
+    })
+  }
+  loadHomestayData()
+  function getHomestayDataRequest() {
+    showLoading()
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve({
+          data: {
+            bannerPath: require('@/assets/images/homestay-banner.png'),
+            isCollect: 0,
+            buildingType: '城市民宿',
+            houseType: '住宅',
+            homestayName: '有家民宿',
+            price: '100',
+            roomerInfo: {
+              peopleNumber: '1',
+              roomNumber: '1',
+              bedNumber: '1'
+            },
+            address: {
+              text: '广东省/韶关市/新丰县',
+              value: '440233',
+              detail: 'xx街道xx号'
+            },
+            toilet: {
+              number: '1',
+              type: '独立卫生间'
+            },
+            servicesList: [],
+            landlordInfo: {
+              avatarPath: getPlaceholderImg(50, 50),
+              name: '陈先生',
+              phone: ''
+            }
+          }
+        })
+        hideLoading()
+      }, 500)
+    })
+  }
+
+  function onCollectBtnClick() {
+    if (homestayData.value?.isCollect === undefined) return
+    homestayData.value.isCollect = (homestayData.value.isCollect == 1 ? 0 : 1)
+  }
+
+  function copyAddress() {
+    Notify({
+      type: 'success',
+      message: '地址已复制到剪贴板'
+    })
+  }
+
+  function contactLandlord() {
+    Notify({
+      type: 'success',
+      message: '房东电话已复制到剪贴板'
+    })
+  }
+
+  function toPanoramaViewPage() {
+    router.push({
+      name: 'panoramaView'
+    })
+  }
 </script>
 <style scoped lang="less">
   @spacing-both-end: 15px;
   .banner {
     height: 250px;
     width: 100%;
+    position: relative;
+    &>img {
+      height: 100%;
+      width: 100%;
+    }
+    .panoramaIcon {
+      width: 70px;
+      height: 70px;
+      .absolute-center();
+      border-radius: 50%;
+      padding: 19px 15px 10px;
+      box-sizing: border-box;
+      background-color: rgba(0, 0, 0, 0.3);
+      img {
+        width: 100%;
+      }
+    }
   }
   .info-cell {
     padding: @spacing-both-end;
@@ -133,44 +188,35 @@
         margin-top: 4px;
         font-weight: bold;
       }
-      .tab-list {
-        margin-top: 6px;
-      }
-      .time {
-        display: flex;
-        justify-content: space-between;
-        border-top: 1px solid @color-light-gray-1;
-        padding: 8px 0 2px;
-        margin-top: 10px;
-        div {
-          span {
-            font-size: 14px;
-            &::after {
-              font-size: 10px;
-            }
-          }
-          .begin::after {
-            content: '入住'
-          }
-          .end {
-            position: relative;
-            padding-left: 10px;
-            margin-left: 10px;
-            &::before {
-              .kerley(120%)
-            }
-            &::after {
-              content: '离开'
-            }
-          }
-        }
-        .amount {
-          font-size: 14px;
+      .price {
+        font-weight: bold;
+        padding-top: 4px;
+        &::after {
+          content: ' / 晚';
+          .font(@color-gray; 12px);
         }
       }
     }
     &.detail {
-
+      ul {
+        li {
+          display: inline-flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          margin-top: 15px;
+          &+li {
+            margin-left: 20px;
+          }
+          img {
+            width: 24px;
+          }
+          div {
+            font-size: 12px;
+            margin-top: 5px;
+          }
+        }
+      }
     }
     &.address {
       .cell-title {
@@ -197,12 +243,6 @@
           padding: 2px 8px;
         }
       }
-      .map-container {
-        height: 126px;
-        border-radius: 5px;
-        background-color: @color-light-gray-2;
-        margin-top: 10px;
-      }
     }
     &.evaluate {
 
@@ -212,10 +252,6 @@
         img {
           width: 100%;
         }
-      }
-      .more-btn {
-        font-size: 14px;
-        text-decoration: underline;
       }
     }
     &.landlord-info {
@@ -272,43 +308,24 @@
     }
   }
   .bottom-nav {
-    height: 70px;
     display: flex;
     position: sticky;
     bottom: 20px;
-    border-radius: 5px;
-    background-color: @color-white;
     margin: 24px @spacing-both-end 0;
-    .shadow();
+    justify-content: right;
     &>div {
+      .shadow();
+      height: 70px;
+      width: 120px;
       display: flex;
-      flex: 1;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      border-radius: 5px;
+      background-color: @color-white;
     }
     .contact {
       
-    }
-    .time {
-      position: relative;
-      &::before {
-        .kerley(100%);
-      }
-    }
-    .reserve-btn {
-      background-color: @color-purple;
-      border-radius: 5px;
-      color: @color-white;
-      .price {
-        &::before {
-          content: '￥';
-          font-size: 12px;
-        }
-        &::after {
-          content: ' / 晚';
-        }
-      }
     }
   }
 </style>

@@ -1,18 +1,27 @@
 <template>
   <div class="keyword-container">
     <ul>
-      <li class="item">景点1</li>
-      <li class="item">景点景点景点2</li>
-      <li class="item">景点景点2</li>
-      <li class="item">景点景点2</li>
-      <li class="item">景点景点2</li>
-      <li class="item">景点景点2</li>
+      <li class="item" v-for="(item, index) in keywordList" :key="index" @click="onKeywordItemClick(item)">{{ item }}</li>
     </ul>
   </div>
 </template>
 
 <script setup lang="ts">
-  
+  import { defineEmits } from 'vue'
+  const emits = defineEmits(['keywordItemClick'])
+
+  const keywordList = [
+    '酒店',
+    '民宿',
+    '投影仪',
+    '厨房可做饭',
+    '空调',
+    '可聚会'
+  ]
+
+  function onKeywordItemClick(value: string) {
+    emits('keywordItemClick', value)
+  }
 </script>
 <style scoped lang="less">
   .keyword-container {

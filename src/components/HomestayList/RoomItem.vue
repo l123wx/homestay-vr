@@ -1,32 +1,35 @@
 <template>
   <div class="room-container" @click="toDetailPage">
     <div class="banner">
-      <ImgBanner />
+      <img :src="props.option.coverImgPath" />
       <div class="collect-btn">
-        <Icon name="like-o" />
+        <Icon :name="props.option.isCollect ? 'like' : 'like-o'" :style="props.option.isCollect ? 'color:#ff2d55' : ''"/>
       </div>
     </div>
-    <div class="description">整套公寓型住宅 · 1室1卫1床 · 可住2人</div>
-    <div class="title">民宿名称名宿名称名宿名称民宿名称民宿名...</div>
-    <TabList class="tab-list" :plain="true" :tabList="tabList"/>
-    <div class="price">￥100</div>
+    <div class="description">{{ props.option.buildingType }} · {{ props.option.houseType }} · {{ props.option.roomNumber }}室{{ props.option.toiletNumber }}卫{{ props.option.bedNumber }}床 · 可住{{ props.option.peopleNumber }}人</div>
+    <div class="title">{{ props.option.homestayName }}</div>
+    <div class="price">￥{{ props.option.price }}</div>
   </div>
 </template>
 
 <script setup lang="ts">
-  import { Icon } from 'vant';
-  import TabList from '@/components/TabList.vue'
-  import ImgBanner from '@/components/ImgBanner.vue'
-  import router from '@/router/index';
-  const tabList = [
-    {
-      title: '景点1',
-      value: 0
-    }, {
-      title: '景点2',
-      value: 2
-    }, 
-  ]
+  import { Icon } from 'vant'
+  import router from '@/router/index'
+  import { defineProps, withDefaults } from 'vue'
+  const props = withDefaults(defineProps<{
+    option: {
+      isCollect: boolean
+      coverImgPath: string
+      homestayName: string
+      price: string
+      peopleNumber: string
+      roomNumber: string
+      bedNumber: string
+      buildingType: string
+      houseType: string
+      toiletNumber: string
+    }
+  }>(), {})
   function toDetailPage(): void {
     router.push('/homestayDetail');
   }
@@ -43,6 +46,10 @@
       position: relative;
       overflow: hidden;
       // background-color: @color-light-gray-3;
+      img {
+        width: 100%;
+        height: 100%;
+      }
       .collect-btn {
         .absolute(@right: 20px; @top: 20px);
         i {

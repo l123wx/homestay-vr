@@ -1,6 +1,6 @@
 <template>
   <div>
-		<img src="https://placekitten.com/375/200" class="banner-img" />
+		<img src="@/assets/images/indexBanner.png" class="banner-img" />
 		<SearchContainer class="search-box" />
 	</div>
 </template>

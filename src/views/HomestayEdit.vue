@@ -41,7 +41,7 @@
 
     <div class="title">房客信息</div>
     <CellGroup>
-      <Field label="房客人数" placeholder="请输入房客人数" v-model="roomerInfo.peopleNumber" />
+      <Field label="可容纳人数" placeholder="请输入可容纳人数" v-model="roomerInfo.peopleNumber" />
       <Field label="卧室数量" placeholder="请输入卧室数量" v-model="roomerInfo.roomNumber" />
       <Field label="床位数量" placeholder="请输入床位数量" v-model="roomerInfo.bedNumber" />
     </CellGroup>

@@ -5,6 +5,7 @@
   </div>
   <div class="operation-container">
     <div class="interact-points-list">
+      交互点
       <ul>
         <li
           v-for="(item, index) in interactPointList"
@@ -27,10 +28,10 @@
         @cancel="showPopup = false"
       />
     </Popup>
-    <Cell title="目标全景" value="123" @click="showPopup = true"></Cell>
+    <Cell title="目标全景" value="请选择目标全景" @click="showPopup = true"></Cell>
     <div class="slider">
       交互点大小
-      <Slider v-model="interactPointScale"/>
+      <Slider v-model="interactPointScale" :disabled="!interactPointList[interactPointIndex]" />
     </div>
   </div>
 
@@ -48,7 +49,7 @@ import * as THREE from 'three'
 
 const VanDialog = Dialog.Component,
   newInteractPointName = ref(''),
-  showNewInteractPointDialog = ref(true);
+  showNewInteractPointDialog = ref(false);
 function addInteractPoint() {
   const newInteractPoint: InteractPoint = {
     name: 'test_1',
@@ -69,22 +70,22 @@ const props = defineProps<{
 }>()
 
 const interactPointList: Array<InteractPoint> = reactive([
-  {
-    name: 'test_1',
-    message: '仓库',
-    position: {x: 41.12218783392694, y: -0.8053452657697661, z: 26.480118531637107},
-    scale: 4
-  }, {
-    name: 'test_1',
-    message: '厨房',
-    position: {x: 48, y: 1, z: 0},
-    scale: 4
-  }, {
-    name: 'test_1',
-    message: '汽车',
-    position: {x: -23.035690643889414, y: -3.028725818509145, z: -43.06321379983966},
-    scale: 4
-  }
+  // {
+  //   name: 'test_1',
+  //   message: '仓库',
+  //   position: {x: 41.12218783392694, y: -0.8053452657697661, z: 26.480118531637107},
+  //   scale: 4
+  // }, {
+  //   name: 'test_1',
+  //   message: '厨房',
+  //   position: {x: 48, y: 1, z: 0},
+  //   scale: 4
+  // }, {
+  //   name: 'test_1',
+  //   message: '汽车',
+  //   position: {x: -23.035690643889414, y: -3.028725818509145, z: -43.06321379983966},
+  //   scale: 4
+  // }
 ])
 const interactPointIndex = ref(0);
 
@@ -104,13 +105,7 @@ columns.value = [
     id: 3
   }
 ]
-const interactPointScale = ref(50);
-const fovValue = ref(60);
 const showPopup = ref(false);
-
-watch(fovValue, function(e) {
-  panorama.fov = e;
-})
 
 const panoramaView = ref();
 let panorama: Panorama;
@@ -134,7 +129,6 @@ onMounted(function() {
 function setInteractPointPositionCenter(object: THREE.Object3D) {
   const intersect = panorama.getCenterIntersects()[0]
   object.position.copy( intersect.point ).add( intersect.face!.normal )
-  console.log(object)
 }
 
 function onInteractPointAddBtnClick() {
@@ -149,10 +143,22 @@ let animate: any = function() {
 // onBeforeUnmount(function() {
 //   animate = null;
 // })
+
+// 交互点大小
+const interactPointScale = ref(50),
+  minScale = 3,
+  maxScale = 6
+watch(() => interactPointScale.value, (newValue) => {
+  const newScale = (maxScale - minScale) * newValue / 100 + minScale
+  console.log(newValue, newScale);
+  if (!interactPointList.length || !interactPointList[interactPointIndex.value]?.object) return
+  interactPointList[interactPointIndex.value].object?.scale.set(newScale, newScale, newScale);
+})
+
 </script>
 <style scoped lang="less">
   .panorama-view {
-    height: calc(100% - 50px - 200px);
+    height: calc(100% - 50px - 220px);
     position: relative;
     .sight-bead {
       position: absolute;
@@ -188,18 +194,17 @@ let animate: any = function() {
     }
   }
   .operation-container {
-    height: 200px;
+    height: 220px;
     width: 100%;
     .interact-points-list {
-      height: 60px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      overflow-x: auto;
+      padding: 20px 10px 0;
       ul {
         display: flex;
         flex-shrink: 0;
-        padding: 0 10px;
+        width: 100%;
+        align-items: center;
+        overflow-x: auto;
+        margin: 10px 0;
         li {
           padding: 6px 10px;
           text-align: center;

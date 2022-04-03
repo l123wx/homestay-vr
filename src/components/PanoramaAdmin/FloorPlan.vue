@@ -15,7 +15,7 @@
       </div>
       <div>方向：{{ compassText }}</div>
       <div>调整指针，指向户型图正北方向</div>
-      <input type="range" v-model="compassAngleInputValue" @change="$emit('update:compassAngle', compass)" />
+      <input type="range" v-model="compassAngleInputValue" @change="$emit('update:compassAngle', compass)" style="margin-top:10px" />
     </div>
     <Field v-model="area" :formatter="(val: string) => (Number(val) || '').toString()" type="number" label="房屋面积" placeholder="请输入房屋面积" @change="$emit('update:area', Number(($event.target as HTMLInputElement).value) || 0)" />
   </div>

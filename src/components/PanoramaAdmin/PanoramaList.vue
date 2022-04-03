@@ -5,6 +5,7 @@
       <li v-for="(item, index) in panoramaList" :key="item.path">
         <div>{{ item.name }}</div>
         <Button type="success" size="mini" @click="onPanoramaEditBtnClick(index)">编辑</Button>
+        <Button type="danger" size="mini" @click="onPanoramaEditBtnClick(index)">删除</Button>
       </li>
     </ul>
     <Button
@@ -57,7 +58,6 @@ function onPanoramaEditBtnClick(index: number) {
 </script>
 <style scoped lang="less">
   .panorama-list-containter {
-    margin: 0 15px;
     .title {
       font-weight: bold;
       margin-bottom: 10px;

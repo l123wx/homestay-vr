@@ -39,11 +39,11 @@
     ul {
       margin-top: 16px;
       li {
+        .shadow();
         display: flex;
         width: 100%;
         padding: 14px 20px;
         border-radius: 5px;
-        box-shadow: 0 0 5px 0 #00000030;
         box-sizing: border-box;
         img {
           height: 70px;
@@ -56,8 +56,8 @@
     }
   }
   .add-button {
+    .shadow();
     border-radius: 5px;
-    box-shadow: 0 0 5px 0 #00000030;
     margin: 30px 20px 0;
     padding: 15px 20px;
   }

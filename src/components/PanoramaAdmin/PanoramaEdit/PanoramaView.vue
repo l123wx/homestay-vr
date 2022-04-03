@@ -7,7 +7,8 @@
       :editable="true"
       @submit-btn-click="floorPlanLocPointLocationSumbit" />
     <div class="fov-controler">
-      <input type="range" v-model="fovValue" />
+      <div>请将视角调整至于右上角提示点视角</div>
+      <input type="range" v-model="fovValue" min="1" />
       <div>请调整合适的视距，尽量还原现实房屋的观感</div>
     </div>
   </div>
@@ -15,9 +16,9 @@
 
 <script setup lang="ts">
 import FloorPlanMap from '@/components/PanoramaAdmin/FloorPlanMap.vue'
-import { onBeforeUnmount, onMounted, watch, ref, defineProps, reactive, defineExpose, readonly} from 'vue';
+import { onBeforeUnmount, onMounted, watch, ref, defineProps, reactive, defineExpose, readonly, inject} from 'vue';
 import { Panorama, PanoramaItem } from '@/assets/javascript/panorama/Panorama'
-
+const { showLoading, hideLoading }: any = inject('loadingOperation')
 const props = defineProps<{
   floorPlanImg: string,
   panoramaInfo: PanoramaItem
@@ -39,11 +40,14 @@ const panoramaView = ref();
 let panorama: Panorama;
 
 onMounted(function() {
+  showLoading()
   if (props.panoramaInfo.location) {
     location.value = props.panoramaInfo.location;
   }
   panorama = new Panorama(panoramaView.value);
-  panorama.initPanorama(props.panoramaInfo);
+  panorama.initPanorama(props.panoramaInfo).then(res => {
+    hideLoading()
+  })
   animate();
 })
 

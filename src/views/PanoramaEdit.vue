@@ -4,8 +4,9 @@
       <Icon name="arrow-left" size="22px" @click="onNavBackBtnClick" />
     </template>
     {{ pageState == 'add' ? '添加' : '编辑'}}全景图
-    <template v-slot:right v-if="panoramaEditing">
-      <Icon name="success" size="22px" @click="onPanoramaEditSubmit" />
+    <template v-slot:right>
+      <Icon v-if="panoramaEditState == PanoramaEditState['editing']" name="success" size="22px" @click="onPanoramaEditSubmit" />
+      <Icon v-if="panoramaEditState == PanoramaEditState['connecting']" name="success" size="22px" @click="onPanoramaConnectSubmit" />
     </template>
   </NavBar>
   <div v-show="panoramaEditState == PanoramaEditState['index']">
@@ -27,8 +28,10 @@
       <Cell title-class="van-field__label" title="全景图关联" center>
         <Button type="success" size="mini" style="padding: 0 20px" @click="panoramaEditState = PanoramaEditState['connecting']">编辑</Button>
       </Cell>
+      <Cell center>
+        <Button size="large" type="success" @click="onSubmitBtnClick">{{ pageState == 'add' ? '添加' : '保存'}}</Button>
+      </Cell>
     </CellGroup>
-    <Button size="large" type="success" @click="onSubmitBtnClick">{{ pageState == 'add' ? '添加' : '保存'}}</Button>
   </div>
   <PanoramaView v-if="panoramaEditState == PanoramaEditState['editing']" :floor-plan-img="floorPlanImg" ref="panoramaView" :panorama-info="panoramaInfo" />
   <PanoramaConnect v-if="panoramaEditState == PanoramaEditState['connecting']" ref="panoramaConnecting" :panorama-info="panoramaInfo" />
@@ -56,7 +59,7 @@ enum PanoramaEditState {
   'connecting'
 }
 
-const floorPlanImg = ref<string>(''), // 户型图
+const floorPlanImg = ref<string>(require('@/assets/images/floorPlan-text.png')), // 户型图
   panoramaEditing = ref(false), // 当前是否在全景编辑页面
   panoramaConnecting = ref(false),
   panoramaEditState = ref<PanoramaEditState>(0),
@@ -66,7 +69,7 @@ const floorPlanImg = ref<string>(''), // 户型图
   panoramaInfo = ref<PanoramaItem>({
     name: '',
     path: '',
-    fov: 0,
+    fov: 60,
     cameraPosition: {
       x: 0, y: 0, z: 0
     },
@@ -94,7 +97,8 @@ onMounted(function() {
       url: panoramaInfo.value.path
     })
   }
-  floorPlanImg.value = (Vuex.state as any).panorama.floorPlanPath;
+  // floorPlanImg.value = require('@/assets/images/floorPlan-text.png');
+  // floorPlanImg.value = (Vuex.state as any).panorama.floorPlanPath;
 })
 
 function afterRead(e: any) {
@@ -125,7 +129,18 @@ function onPanoramaEditSubmit() {
     cameraPosition: res.getRotations(),
     location: res.getLocation()
   }
-  panoramaEditing.value = false;
+  panoramaEditState.value = PanoramaEditState['index']
+}
+
+function onPanoramaConnectSubmit() {
+  // const res = panoramaView.value;
+  // panoramaInfo.value = {
+  //   ...panoramaInfo.value,
+  //   fov: res.getFov(),
+  //   cameraPosition: res.getRotations(),
+  //   location: res.getLocation()
+  // }
+  panoramaEditState.value = PanoramaEditState['index']
 }
 
 function backToPanoramaList() {
@@ -154,6 +169,9 @@ function updatePanorama() {
 
 </script>
 <style scoped lang="less">
+  .van-cell {
+    padding: var(--van-cell-vertical-padding) 22px;
+  }
   .align-left {
     text-align: left
   }

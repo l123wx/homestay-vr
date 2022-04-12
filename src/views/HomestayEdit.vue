@@ -1,9 +1,9 @@
 <template>
   <div>
-    <NavBar class="nav-bar" bgColor="#fff">房源信息编辑</NavBar>
+    <NavBar class="nav-bar" bgColor="#fff">{{ pageState === 'add' ? '添加新房源' : '房源信息编辑' }}</NavBar>
     <div class="title">房源信息</div>
     <CellGroup>
-      <Field label="房间名称" placeholder="请输入房间名称" />
+      <Field label="房间名称" placeholder="请输入房间名称" v-model="homestayName" />
       <Cell
         title-class="van-field__label"
         title="建筑类型"
@@ -87,7 +87,7 @@
         title-class="van-field__label"
         title="卫生间类型"
         center
-        value="请选择卫生间类型"
+        :value="toiletTypeValue || '请选择卫生间类型'"
         @click="showToiletTypePickerPopup = true"></Cell>
       <Popup v-model:show="showToiletTypePickerPopup" round position="bottom">
         <Picker
@@ -108,7 +108,8 @@
     </CellGroup>
 
     <div class="bottom">
-      <Button type="success" size="large">保存</Button>
+      <Button v-if="pageState === 'add'" type="success" size="large">添加</Button>
+      <Button v-else type="success" size="large">保存</Button>
     </div>
   </div>
 </template>
@@ -117,9 +118,13 @@
   import NavBar from '@/components/NavBar.vue'
   import { Cell, CellGroup, Field, Checkbox, Button, Popup, Cascader, Picker, Uploader } from 'vant';
   import { reactive, ref } from 'vue';
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   import { cityData, CityItem } from '@/assets/javascript/city'
-  const router = useRouter();
+  const router = useRouter(),
+    route = useRoute(),
+    pageState = ref<'add' | 'edit'>(route.params.state as any || 'add')
+
+  const homestayName = ref('')
 
   // 建筑类型
   const showBuildingTypePickerPopup = ref(false)

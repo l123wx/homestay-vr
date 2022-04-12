@@ -18,6 +18,7 @@
   import { inject, reactive, Ref } from 'vue'
   import { useRouter } from 'vue-router'
   import { Field, Button, Notify } from 'vant'
+  import axios from '@/service/index'
   const { showLoading, hideLoading }: any = inject('loadingOperation')
   const router = useRouter()
   const formData = reactive({
@@ -37,7 +38,29 @@
 
   function login() {
     if (formValidaton()) {
-      loginRequest(formData.username.value, formData.password.value)
+      showLoading()
+      loginRequest(formData.username.value, formData.password.value).then((res: any) => {
+        const result = res.data
+        if (result.msg === 'This username does not exist.') {
+          Notify('该账号未注册')
+        } else if (result.msg === 'Password error.') {
+          Notify({
+            message: '密码错误',
+            type: 'danger'
+          })
+        } else {
+          localStorage.setItem('token', result.data.token)
+          Notify({
+            type: 'success',
+            message: '登录成功',
+            duration: 500,
+            onClose() {
+              router.push('/')
+            }
+          })
+        }
+        hideLoading()
+      })
     }
   }
   function formValidaton(): boolean {
@@ -51,26 +74,13 @@
     return true
   }
   function loginRequest(username: string, password: string) {
-    return new Promise((resolve, reject) => {
-      showLoading()
-      setTimeout(function() {
-        if (username != 'text') {
-          Notify('该账号未注册')
-        } else if (password != '123456') {
-          Notify('密码错误')
-        } else {
-          Notify({
-            type: 'success',
-            message: '登录成功',
-            duration: 500,
-            onClose() {
-              router.push('/')
-            }
-          })
-        }
-        hideLoading()
-        resolve({})
-      }, 500)
+    return axios({
+      url: '/api/user/login',
+      method: 'POST',
+      data: {
+        username,
+        password
+      }
     })
   }
 </script>

@@ -3,6 +3,9 @@ module.exports = {
   env: {
     node: true
   },
+  "globals": {
+    "plus": true
+  },
   'extends': [
     'plugin:vue/vue3-essential',
     'eslint:recommended',
@@ -10,9 +13,11 @@ module.exports = {
   ],
   overrides: [
     {
-      files: ['src/views/**/*.vue'],
+      files: [
+        'src/views/**/*.vue'
+      ],
       rules: {
-        'vue/multi-word-component-names': 0,
+        'vue/multi-word-component-names': 0
       },
     },
   ],

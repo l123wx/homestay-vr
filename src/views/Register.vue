@@ -22,6 +22,7 @@
   import { inject, reactive, Ref } from 'vue'
   import { Field, Button, Notify } from 'vant'
   import NavBar from '@/components/NavBar.vue'
+  import axios from '@/service/index';
   const { showLoading, hideLoading }: any = inject('loadingOperation')
 
   const router = useRouter()
@@ -47,10 +48,36 @@
 
   function register() {
     if (formValidaton()) {
+      showLoading()
       registerRequest({
         username: formData.username.value,
         password: formData.password.value,
         phone: formData.phone.value
+      }).then((res: any) => {
+        hideLoading()
+        const result = res.data
+        if (result.code === 200) {
+          if (result.msg === 'This username already exist.') {
+            Notify({
+              type: 'warning',
+              message: '用户名已存在！'
+            })
+          } else {
+            Notify({
+              type: 'success',
+              message: '注册成功！',
+              duration: 500,
+              onClose() {
+                toLoginPage()
+              }
+            })
+          }
+        } else {
+          Notify({
+            type: 'warning',
+            message: '请求出错，请重试'
+          })
+        }
       })
     }
   }
@@ -69,25 +96,14 @@
     password: string
     phone: string
   }) {
-    return new Promise((resolve, reject) => {
-      console.log(arguments)
-      showLoading()
-      setTimeout(function() {
-        if (username == 'asd') {
-          Notify('该账号已被注册')
-        } else {
-          Notify({
-            type: 'success',
-            message: '注册成功',
-            duration: 500,
-            onClose() {
-              toLoginPage()
-            }
-          })
-        }
-        hideLoading()
-        resolve({})
-      }, 500)
+    return axios({
+      url: '/api/user/register',
+      method: 'POST',
+      data: {
+        username,
+        password,
+        phone
+      }
     })
   }
 </script>
